@@ -14,6 +14,8 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI highscoreText;
+    
+    [SerializeField] private RoadGenerator roadGenerator;
 
     private void Awake()
     {
@@ -35,6 +37,7 @@ public class GameManager : MonoBehaviour
     {
         gameStarted = true;
         isFalling = false;
+        roadGenerator.enabled = true;
     }
 
     public void EndGame()

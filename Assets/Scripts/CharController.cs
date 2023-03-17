@@ -5,12 +5,14 @@ using UnityEngine;
 
 public class CharController : MonoBehaviour
 {
+    [SerializeField] private Transform rayStart;
+    [SerializeField] private GameObject crystalEffect;
+
     [SerializeField] private float movementSpeed;
     [SerializeField] private float timeBeforeGameRestart;
     
     private Rigidbody rb;
     private bool walkingRight = true;
-    [SerializeField] private Transform rayStart;
     private Animator anim;
     private GameManager gameManager;
     
@@ -51,7 +53,6 @@ public class CharController : MonoBehaviour
             gameManager.Invoke("EndGame", timeBeforeGameRestart);
         }
     }
-
     private void SwitchDirection()
     {
         walkingRight = !walkingRight;
@@ -66,8 +67,18 @@ public class CharController : MonoBehaviour
     {
         if (other.tag == "Crystal")
         {
-            Destroy(other.gameObject);
             gameManager.IncreaseScore();
+
+            GameObject g = Instantiate(crystalEffect, rayStart.transform.position, crystalEffect.transform.rotation);
+            ParticleSystem ps = g.GetComponent<ParticleSystem>();
+            ps.Play();
+            Destroy(g, ps.main.duration);
+            Destroy(other.gameObject);
         }
+    }
+    
+    public float GetMovementSpeed()
+    {
+        return movementSpeed;
     }
 }
