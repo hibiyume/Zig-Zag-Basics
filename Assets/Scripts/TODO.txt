@@ -1,1 +1,1 @@
-﻿1. Add UI before starting the game (so that player knew he should press "Enter" to start.
+﻿1. Add background

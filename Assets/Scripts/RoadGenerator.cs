@@ -18,16 +18,18 @@ public class RoadGenerator : MonoBehaviour
     private float crystalChance = 0.15f;
 
     private Vector3 previousLocalPosition;
-    private float spawningSpeedInSeconds = 0.4f; //TODO objects are destroyed and spawned too fast
+    private float spawningSpeedInSeconds;
+    private const float StartSpawningDelayInSeconds = 0.5f;
+    private const float CubeLength = 2f;
     private float destroyDelayInSeconds = 15f;
 
     private void Start()
     {
         previousLocalPosition = roadStartPoint.localPosition;
         charMovementSpeed = charController.GetMovementSpeed();
-        spawningSpeedInSeconds = charMovementSpeed / 12.5f;
+        spawningSpeedInSeconds = CubeLength / charMovementSpeed;
         
-        Invoke("InstantiateNewRoadPart", spawningSpeedInSeconds);
+        Invoke("InstantiateNewRoadPart", spawningSpeedInSeconds + StartSpawningDelayInSeconds);
     }
 
     private void InstantiateNewRoadPart()
@@ -39,10 +41,11 @@ public class RoadGenerator : MonoBehaviour
             newPos = previousLocalPosition + new Vector3(0f, 0f, 1f);
         else
             newPos = previousLocalPosition + new Vector3(-1f, 0f, 0f);
-            
+
         // Spawning Road Part
         GameObject g = Instantiate(roadPart, roadFolder, false);
         g.transform.localPosition = newPos;
+        
         previousLocalPosition = newPos;
 
         // Spawning Crystal
@@ -55,6 +58,9 @@ public class RoadGenerator : MonoBehaviour
         }
         
         g.transform.GetChild(0).GetComponent<Animator>().Play("Road_Part_Spawning");
+
+        charMovementSpeed = charController.GetMovementSpeed();
+        spawningSpeedInSeconds = (CubeLength / charMovementSpeed) * 1.025f;
         
         Invoke("InstantiateNewRoadPart", spawningSpeedInSeconds);
         Destroy(g, destroyDelayInSeconds);

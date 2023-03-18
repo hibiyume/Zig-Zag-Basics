@@ -14,7 +14,9 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private TextMeshProUGUI highscoreText;
-    
+    [SerializeField] private GameObject guidePanel;
+
+    [SerializeField] private CharController charController;
     [SerializeField] private RoadGenerator roadGenerator;
 
     private void Awake()
@@ -27,9 +29,10 @@ public class GameManager : MonoBehaviour
     
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Return))
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            StartGame();
+            if (!gameStarted)
+                StartGame();
         }
     }
     
@@ -37,7 +40,10 @@ public class GameManager : MonoBehaviour
     {
         gameStarted = true;
         isFalling = false;
+        
         roadGenerator.enabled = true;
+        charController.enabled = true;
+        guidePanel.GetComponent<Animator>().SetTrigger("gameStarted");
     }
 
     public void EndGame()

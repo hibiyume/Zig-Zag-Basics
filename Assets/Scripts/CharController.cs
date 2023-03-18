@@ -5,17 +5,18 @@ using UnityEngine;
 
 public class CharController : MonoBehaviour
 {
-    [SerializeField] private Transform rayStart;
+    [SerializeField] private Transform rayStart1;
+    [SerializeField] private Transform rayStart2;
     [SerializeField] private GameObject crystalEffect;
 
     [SerializeField] private float movementSpeed;
     [SerializeField] private float timeBeforeGameRestart;
-    
+
     private Rigidbody rb;
     private bool walkingRight = true;
     private Animator anim;
     private GameManager gameManager;
-    
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -23,40 +24,47 @@ public class CharController : MonoBehaviour
         gameManager = FindObjectOfType<GameManager>();
     }
 
+    private void Start()
+    {
+        anim.SetTrigger("gameStarted");
+        InvokeRepeating("IncreaseMovementSpeed", 5f, 1f);
+    }
+
     private void FixedUpdate()
     {
-        if (!gameManager.gameStarted)
-            return;
-        else
-            anim.SetTrigger("gameStarted");
-        
         rb.transform.position = transform.position + transform.forward * (movementSpeed / 100f);
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            if (!gameManager.isFalling && gameManager.gameStarted)
-                SwitchDirection();
-        }
-
-        RaycastHit hit;
-        if (!Physics.Raycast(rayStart.position, -transform.up, out hit, Mathf.Infinity))
-        {
-            gameManager.isFalling = true;
-            anim.SetTrigger("isFalling");
-        }
-
+        CheckForGround();
         if (gameManager.isFalling)
         {
             gameManager.Invoke("EndGame", timeBeforeGameRestart);
         }
+        
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (!gameManager.isFalling)
+                SwitchDirection();
+        }
     }
+
+    private void CheckForGround()
+    {
+        RaycastHit hit;
+        if (!Physics.Raycast(rayStart1.position, -transform.up, out hit, Mathf.Infinity) &&
+            !Physics.Raycast(rayStart2.position, -transform.up, out hit, Mathf.Infinity))
+        {
+            gameManager.isFalling = true;
+            anim.SetTrigger("isFalling");
+        }
+    }
+
     private void SwitchDirection()
     {
         walkingRight = !walkingRight;
-        
+
         if (walkingRight)
             transform.rotation = Quaternion.Euler(0f, 45f, 0f);
         else
@@ -68,17 +76,22 @@ public class CharController : MonoBehaviour
         if (other.tag == "Crystal")
         {
             gameManager.IncreaseScore();
-
-            GameObject g = Instantiate(crystalEffect, rayStart.transform.position, crystalEffect.transform.rotation);
+            
+            GameObject g = Instantiate(crystalEffect, transform.position + GetComponent<CapsuleCollider>().center, crystalEffect.transform.rotation);
             ParticleSystem ps = g.GetComponent<ParticleSystem>();
             ps.Play();
             Destroy(g, ps.main.duration);
             Destroy(other.gameObject);
         }
     }
-    
+
     public float GetMovementSpeed()
     {
         return movementSpeed;
     }
+
+    private void IncreaseMovementSpeed()
+    {
+        movementSpeed += 0.0075f;
+    } // Invoked every second
 }
